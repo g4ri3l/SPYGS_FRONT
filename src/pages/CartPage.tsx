@@ -1,0 +1,144 @@
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
+
+const CartPage = () => {
+  const navigate = useNavigate();
+  const { cartItems, updateQuantity, clearCart, getTotal } = useCart();
+  const { addNotification } = useNotifications();
+
+  const subtotal = getTotal();
+  const deliveryFee = 3.50;
+  const tax = subtotal * 0.18;
+  const total = subtotal + deliveryFee + tax;
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-fixed p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Carrito de Compras</h1>
+
+        {cartItems.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+            <svg className="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <p className="text-xl text-gray-600 mb-2">Tu carrito está vacío</p>
+            <p className="text-gray-500 mb-6">Agrega productos deliciosos a tu carrito</p>
+            <button
+              onClick={() => navigate('/home')}
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
+            >
+              Explorar Menú
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              {cartItems.map((item) => (
+                <div key={item.id} className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="flex gap-4">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-24 h-24 object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop&q=80';
+                      }}
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
+                      <p className="text-sm text-gray-500">{item.restaurant}</p>
+                      <p className="text-xl font-bold text-primary-500 mt-2">${item.price.toFixed(2)}</p>
+                    </div>
+                    <div className="flex flex-col items-end justify-between">
+                      <button
+                        onClick={() => updateQuantity(item.id, 0)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-primary-500 hover:text-primary-500 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          </svg>
+                        </button>
+                        <span className="text-lg font-semibold text-gray-900 w-8 text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-primary-500 hover:text-primary-500 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </button>
+                      </div>
+                      <p className="text-lg font-bold text-gray-900 mt-2">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Resumen del Pedido</h2>
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Envío</span>
+                    <span>${deliveryFee.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Impuestos</span>
+                    <span>${tax.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-3 flex justify-between text-lg font-bold text-gray-900">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (cartItems.length === 0) return;
+                    addNotification({
+                      title: '¡Pedido realizado!',
+                      message: `Tu pedido por $${total.toFixed(2)} ha sido confirmado. Te notificaremos cuando esté en camino.`,
+                      type: 'success'
+                    });
+                    clearCart();
+                    navigate('/orders');
+                  }}
+                  disabled={cartItems.length === 0}
+                  className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-700 text-white rounded-lg font-semibold hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Realizar Pedido
+                </button>
+                <button
+                  onClick={() => navigate('/home')}
+                  className="w-full py-3 mt-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Seguir Comprando
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CartPage;
+

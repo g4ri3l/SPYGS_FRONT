@@ -57,8 +57,8 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
             </svg>
           </button>
           <div className="absolute top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[140px] opacity-0 invisible -translate-y-2 transition-all duration-300 z-50 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
-            <button onClick={() => handleFilterChange('Todos')} className="block w-full py-2 px-3 text-left text-xs text-gray-700 hover:bg-primary-50 transition-colors rounded-t-lg">Todos</button>
-            <button onClick={() => handleFilterChange('Comida')} className="block w-full py-2 px-3 text-left text-xs text-gray-700 hover:bg-primary-50 transition-colors rounded-b-lg">Comida</button>
+            <button onClick={() => handleFilterChange('Todos')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Todos</button>
+            <button onClick={() => handleFilterChange('Comida')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Comida</button>
           </div>
         </div>
 
@@ -74,10 +74,10 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
             </svg>
           </button>
           <div className="absolute top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[160px] opacity-0 invisible -translate-y-2 transition-all duration-300 z-50 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
-            <button onClick={() => handleSortChange('Mejor valorados')} className="block w-full py-2 px-3 text-left text-xs text-gray-700 hover:bg-primary-50 transition-colors rounded-t-lg">Mejor valorados</button>
-            <button onClick={() => handleSortChange('Más cercanos')} className="block w-full py-2 px-3 text-left text-xs text-gray-700 hover:bg-primary-50 transition-colors">Más cercanos</button>
-            <button onClick={() => handleSortChange('Menor precio')} className="block w-full py-2 px-3 text-left text-xs text-gray-700 hover:bg-primary-50 transition-colors">Menor precio</button>
-            <button onClick={() => handleSortChange('Mayor precio')} className="block w-full py-2 px-3 text-left text-xs text-gray-700 hover:bg-primary-50 transition-colors rounded-b-lg">Mayor precio</button>
+            <button onClick={() => handleSortChange('Mejor valorados')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Mejor valorados</button>
+            <button onClick={() => handleSortChange('Más cercanos')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Más cercanos</button>
+            <button onClick={() => handleSortChange('Menor precio')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Menor precio</button>
+            <button onClick={() => handleSortChange('Mayor precio')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Mayor precio</button>
           </div>
         </div>
 

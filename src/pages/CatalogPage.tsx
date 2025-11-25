@@ -144,7 +144,7 @@ const CatalogPage = () => {
   const displayedProducts = products.length > 0 ? products : mockProducts;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-fixed p-8 box-border">
+    <div className="min-h-screen bg-orange-100 p-8 box-border">
       <div className="max-w-7xl mx-auto">
         <SearchBar
           onSearch={setSearchQuery}

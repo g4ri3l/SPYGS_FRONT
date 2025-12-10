@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { paymentMethodsAPI } from '../services/api';
+import { useNotifications } from '../context/NotificationContext';
+import Loading from '../components/Loading';
 
 interface PaymentMethod {
   id: string;
@@ -11,17 +14,10 @@ interface PaymentMethod {
 }
 
 const PaymentMethodsPage = () => {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    {
-      id: '1',
-      type: 'card',
-      cardNumber: '**** **** **** 1234',
-      cardHolder: 'USUARIO DEMO',
-      expiryDate: '12/25',
-      isDefault: true
-    }
-  ]);
-
+  const { addNotification } = useNotifications();
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState<Omit<PaymentMethod, 'id'>>({
     type: 'card',
@@ -32,8 +28,37 @@ const PaymentMethodsPage = () => {
     isDefault: false
   });
 
+  useEffect(() => {
+    const loadPaymentMethods = async () => {
+      setIsLoading(true);
+      try {
+        const data = await paymentMethodsAPI.getAll();
+        const formattedMethods = (data.paymentMethods || data || []).map((method: any) => ({
+          id: method.id || method._id || '',
+          type: method.type || 'card',
+          cardNumber: method.cardNumber || '',
+          cardHolder: method.cardHolder || '',
+          expiryDate: method.expiryDate || '',
+          isDefault: method.isDefault || false
+        }));
+        setPaymentMethods(formattedMethods);
+      } catch (err: any) {
+        console.error('Error al cargar métodos de pago:', err);
+        addNotification({
+          title: 'Error',
+          message: 'No se pudieron cargar los métodos de pago.',
+          type: 'error'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPaymentMethods();
+  }, [addNotification]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     let processedValue = value;
 
     // Formatear número de tarjeta
@@ -59,45 +84,112 @@ const PaymentMethodsPage = () => {
     });
   };
 
-  const handleSave = () => {
-    if (formData.type === 'card') {
-      const newMethod: PaymentMethod = {
-        ...formData,
-        cardNumber: `**** **** **** ${formData.cardNumber?.slice(-4) || ''}`,
-        id: Date.now().toString()
-      };
-      setPaymentMethods([...paymentMethods, newMethod]);
-    } else {
-      const newMethod: PaymentMethod = {
-        type: 'cash',
-        isDefault: formData.isDefault,
-        id: Date.now().toString()
-      };
-      setPaymentMethods([...paymentMethods, newMethod]);
+  const handleSave = async () => {
+    if (formData.type === 'card' && (!formData.cardNumber || !formData.cardHolder || !formData.expiryDate)) {
+      addNotification({
+        title: 'Error de validación',
+        message: 'Por favor, completa todos los campos de la tarjeta.',
+        type: 'error'
+      });
+      return;
     }
-    setIsAdding(false);
-    setFormData({
-      type: 'card',
-      cardNumber: '',
-      cardHolder: '',
-      expiryDate: '',
-      cvv: '',
-      isDefault: false
-    });
+
+    setIsSaving(true);
+    try {
+      if (formData.type === 'card') {
+        await paymentMethodsAPI.add(
+          'card',
+          formData.cardNumber?.replace(/\s/g, '') || '',
+          formData.cardHolder || '',
+          formData.expiryDate || '',
+          formData.isDefault
+        );
+      } else {
+        await paymentMethodsAPI.add('cash', '', '', '', formData.isDefault);
+      }
+      
+      const updated = await paymentMethodsAPI.getAll();
+      const formattedMethods = (updated.paymentMethods || updated || []).map((method: any) => ({
+        id: method.id || method._id || '',
+        type: method.type || 'card',
+        cardNumber: method.cardNumber || '',
+        cardHolder: method.cardHolder || '',
+        expiryDate: method.expiryDate || '',
+        isDefault: method.isDefault || false
+      }));
+      setPaymentMethods(formattedMethods);
+      setIsAdding(false);
+      setFormData({
+        type: 'card',
+        cardNumber: '',
+        cardHolder: '',
+        expiryDate: '',
+        cvv: '',
+        isDefault: false
+      });
+      addNotification({
+        title: 'Método de pago agregado',
+        message: 'El método de pago se ha agregado correctamente.',
+        type: 'success'
+      });
+    } catch (err: any) {
+      addNotification({
+        title: 'Error',
+        message: err.message || 'No se pudo guardar el método de pago.',
+        type: 'error'
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('¿Estás seguro de eliminar este método de pago?')) {
-      setPaymentMethods(paymentMethods.filter(method => method.id !== id));
+      try {
+        await paymentMethodsAPI.delete(id);
+        setPaymentMethods(paymentMethods.filter(method => method.id !== id));
+        addNotification({
+          title: 'Método de pago eliminado',
+          message: 'El método de pago se ha eliminado correctamente.',
+          type: 'success'
+        });
+      } catch (err: any) {
+        addNotification({
+          title: 'Error',
+          message: err.message || 'No se pudo eliminar el método de pago.',
+          type: 'error'
+        });
+      }
     }
   };
 
-  const handleSetDefault = (id: string) => {
-    setPaymentMethods(paymentMethods.map(method => ({
-      ...method,
-      isDefault: method.id === id
-    })));
+  const handleSetDefault = async (id: string) => {
+    try {
+      const method = paymentMethods.find(m => m.id === id);
+      if (method) {
+        await paymentMethodsAPI.update(id, { isDefault: true });
+        setPaymentMethods(paymentMethods.map(m => ({
+          ...m,
+          isDefault: m.id === id
+        })));
+        addNotification({
+          title: 'Método predeterminado',
+          message: 'El método de pago se ha establecido como predeterminado.',
+          type: 'success'
+        });
+      }
+    } catch (err: any) {
+      addNotification({
+        title: 'Error',
+        message: err.message || 'No se pudo establecer el método predeterminado.',
+        type: 'error'
+      });
+    }
   };
+
+  if (isLoading) {
+    return <Loading fullScreen text="Cargando métodos de pago..." />;
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-fixed p-8">
@@ -213,9 +305,10 @@ const PaymentMethodsPage = () => {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={handleSave}
-                className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                disabled={isSaving}
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Guardar
+                {isSaving ? 'Guardando...' : 'Guardar'}
               </button>
               <button
                 onClick={() => setIsAdding(false)}

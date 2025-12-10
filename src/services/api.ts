@@ -6,7 +6,7 @@ const getToken = (): string | null => {
 };
 
 // Función para hacer peticiones HTTP
-const fetchAPI = async (
+export const fetchAPI = async (
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> => {
@@ -153,6 +153,13 @@ export const ordersAPI = {
     });
     return response.json();
   },
+
+  cancel: async (id: string) => {
+    const response = await fetchAPI(`/orders/${id}/cancel`, {
+      method: 'PUT',
+    });
+    return response.json();
+  },
 };
 
 // API de Favoritos
@@ -264,6 +271,14 @@ export const paymentMethodsAPI = {
     const response = await fetchAPI(`/payment-methods/${id}`, {
       method: 'DELETE',
     });
+    return response.json();
+  },
+};
+
+// API de Notificaciones
+export const notificationsAPI = {
+  getAll: async () => {
+    const response = await fetchAPI('/notifications');
     return response.json();
   },
 };

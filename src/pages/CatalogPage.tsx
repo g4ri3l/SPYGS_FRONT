@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import SearchBar from '../components/SearchBar';
 import ProductCard from '../components/ProductCard';
+import { useI18n } from '../context/I18nContext';
 import type { Product } from '../components/ProductCard';
 import { productsAPI } from '../services/api';
 
@@ -105,9 +106,10 @@ const mockProducts: Product[] = [
 ];
 
 const CatalogPage = () => {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('Todos');
-  const [selectedSort, setSelectedSort] = useState('Mejor valorados');
+  const [selectedFilter, setSelectedFilter] = useState(t('products.allCategories'));
+  const [selectedSort, setSelectedSort] = useState(t('products.bestRated'));
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -118,7 +120,7 @@ const CatalogPage = () => {
       setIsLoading(true);
       setError('');
       try {
-        const category = selectedFilter === 'Todos' ? undefined : selectedFilter;
+        const category = selectedFilter === t('products.allCategories') ? undefined : selectedFilter;
         const data = await productsAPI.getAll(searchQuery || undefined, category, selectedSort);
         
         // Convertir los productos del backend al formato correcto
@@ -160,13 +162,13 @@ const CatalogPage = () => {
 
         <div className="mb-6">
           <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-            {isLoading ? 'Cargando...' : `${displayedProducts.length} resultados`}
+            {isLoading ? t('common.loading') : `${displayedProducts.length} ${t('products.title')}`}
           </span>
         </div>
 
         {isLoading ? (
           <div className="text-center py-16">
-            <div className="text-lg text-gray-600 dark:text-gray-400">Cargando productos...</div>
+            <div className="text-lg text-gray-600 dark:text-gray-400">{t('common.loading')}</div>
           </div>
         ) : (
           <>
@@ -178,8 +180,8 @@ const CatalogPage = () => {
 
             {displayedProducts.length === 0 && (
               <div className="text-center py-16 px-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
-                <p className="text-lg text-gray-600 dark:text-gray-400 my-2">No se encontraron resultados para tu búsqueda.</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">Intenta con otros términos o ajusta los filtros.</p>
+                <p className="text-lg text-gray-600 dark:text-gray-400 my-2">{t('products.noProducts')}</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500">{t('common.search')}</p>
               </div>
             )}
           </>

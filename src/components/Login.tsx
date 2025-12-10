@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useI18n } from '../context/I18nContext';
 
 // Declarar el tipo para Google Identity Services
 declare global {
@@ -23,6 +24,7 @@ declare global {
 
 const Login = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { login, register, googleLogin } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [error, setError] = useState<string>('');
@@ -47,7 +49,7 @@ const Login = () => {
       await login(email, password);
       navigate('/home');
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión');
+      setError(err.message || t('auth.loginError'));
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +60,7 @@ const Login = () => {
     setError('');
     
     if (registerPassword !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError(t('auth.confirmPassword') + ' - ' + t('common.error'));
       return;
     }
     
@@ -67,7 +69,7 @@ const Login = () => {
       await register(registerName, registerEmail, registerPassword);
       navigate('/home');
     } catch (err: any) {
-      setError(err.message || 'Error al registrarse');
+      setError(err.message || t('auth.registerError'));
     } finally {
       setIsLoading(false);
     }
@@ -183,11 +185,6 @@ const Login = () => {
     }
   };
 
-  const handleFacebookLogin = () => {
-    // Aquí irá la lógica de login con Facebook
-    console.log('Login con Facebook');
-  };
-
   return (
     <div className="flex justify-center items-center min-h-screen w-full p-8 box-border relative">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden mx-auto">
@@ -201,7 +198,7 @@ const Login = () => {
             } hover:text-gray-900 hover:bg-black/5`}
             onClick={() => setActiveTab('login')}
           >
-            Iniciar Sesión
+            {t('auth.login')}
             {activeTab === 'login' && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-500 to-primary-700"></span>
             )}
@@ -214,7 +211,7 @@ const Login = () => {
             } hover:text-gray-900 hover:bg-black/5`}
             onClick={() => setActiveTab('register')}
           >
-            Registrarse
+            {t('auth.register')}
             {activeTab === 'register' && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-500 to-primary-700"></span>
             )}
@@ -231,16 +228,16 @@ const Login = () => {
           
           {activeTab === 'login' ? (
             <>
-              <h1 className="text-3xl font-bold text-gray-900 m-0 mb-2 text-center leading-tight">Inicia Sesión</h1>
-              <p className="text-sm text-gray-600 text-center mb-8 leading-snug">Accede a tu cuenta para continuar</p>
+              <h1 className="text-3xl font-bold text-gray-900 m-0 mb-2 text-center leading-tight">{t('auth.login')}</h1>
+              <p className="text-sm text-gray-600 text-center mb-8 leading-snug">{t('auth.login')}</p>
 
               <form onSubmit={handleLoginSubmit} className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="email" className="text-sm font-medium text-gray-700">Email o Usuario</label>
+                  <label htmlFor="email" className="text-sm font-medium text-gray-700">{t('auth.email')}</label>
                   <input
                     type="text"
                     id="email"
-                    placeholder="Direccion de correo electronico"
+                    placeholder={t('auth.email')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="py-3.5 px-4 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10 placeholder:text-gray-400"
@@ -266,14 +263,14 @@ const Login = () => {
                   disabled={isLoading}
                   className="py-3.5 px-6 bg-gradient-to-r from-primary-500 to-primary-700 text-white rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 mt-2 w-full hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-500/40 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                  {isLoading ? t('common.loading') : t('auth.login')}
                 </button>
               </form>
             </>
           ) : (
             <>
-              <h1 className="text-3xl font-bold text-gray-900 m-0 mb-2 text-center leading-tight">Crea tu Cuenta</h1>
-              <p className="text-sm text-gray-600 text-center mb-8 leading-snug">Regístrate para comenzar</p>
+              <h1 className="text-3xl font-bold text-gray-900 m-0 mb-2 text-center leading-tight">{t('auth.createAccount')}</h1>
+              <p className="text-sm text-gray-600 text-center mb-8 leading-snug">{t('auth.register')}</p>
 
               <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
@@ -290,7 +287,7 @@ const Login = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="registerEmail" className="text-sm font-medium text-gray-700">Email</label>
+                  <label htmlFor="registerEmail" className="text-sm font-medium text-gray-700">{t('auth.email')}</label>
                   <input
                     type="email"
                     id="registerEmail"
@@ -303,7 +300,7 @@ const Login = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="registerPassword" className="text-sm font-medium text-gray-700">Contraseña</label>
+                  <label htmlFor="registerPassword" className="text-sm font-medium text-gray-700">{t('auth.password')}</label>
                   <input
                     type="password"
                     id="registerPassword"
@@ -317,7 +314,7 @@ const Login = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">Confirmar Contraseña</label>
+                  <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">{t('auth.confirmPassword')}</label>
                   <input
                     type="password"
                     id="confirmPassword"
@@ -335,7 +332,7 @@ const Login = () => {
                   disabled={isLoading}
                   className="py-3.5 px-6 bg-gradient-to-r from-primary-500 to-primary-700 text-white rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 mt-2 w-full hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-500/40 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Registrando...' : 'Registrarse'}
+                  {isLoading ? t('common.loading') : t('auth.register')}
                 </button>
               </form>
             </>
@@ -379,7 +376,7 @@ const Login = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Google
+              {t('auth.loginWithGoogle')}
             </button>
 
                {/*<button

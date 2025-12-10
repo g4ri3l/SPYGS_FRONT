@@ -6,6 +6,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  role?: 'customer' | 'delivery' | 'admin';
 }
 
 interface AuthContextType {
@@ -13,6 +14,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   googleLogin: (googleToken: string) => Promise<void>;
@@ -39,7 +41,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser({
               id: data.user.userId || data.user.id || '',
               name: data.user.name || '',
-              email: data.user.email || ''
+              email: data.user.email || '',
+              role: data.user.role || 'customer'
             });
           } else if (!data.valid) {
             // Token inválido, limpiar
@@ -67,7 +70,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await authAPI.login(email, password);
       setToken(data.token);
-      setUser(data.user);
+      setUser({
+        ...data.user,
+        role: data.user.role || 'customer'
+      });
       localStorage.setItem('token', data.token);
     } catch (error) {
       throw error;
@@ -78,7 +84,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await authAPI.register(name, email, password);
       setToken(data.token);
-      setUser(data.user);
+      setUser({
+        ...data.user,
+        role: data.user.role || 'customer'
+      });
       localStorage.setItem('token', data.token);
     } catch (error) {
       throw error;
@@ -92,7 +101,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Respuesta inválida del servidor');
       }
       setToken(data.token);
-      setUser(data.user);
+      setUser({
+        ...data.user,
+        role: data.user.role || 'customer'
+      });
       localStorage.setItem('token', data.token);
       setIsLoading(false); // Asegurar que isLoading sea false después del login
     } catch (error: any) {
@@ -108,6 +120,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('token');
   };
 
+  // Verificar si el usuario es admin
+  // Puede ser por role o por email específico (para compatibilidad)
+  const isAdmin = user ? (
+    user.role === 'admin' || 
+    user.email === 'admin@pedidospro.com' ||
+    user.email === 'administrador@pedidospro.com'
+  ) : false;
+
   return (
     <AuthContext.Provider
       value={{
@@ -115,6 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         token,
         isAuthenticated: !!token,
         isLoading,
+        isAdmin,
         login,
         register,
         googleLogin,

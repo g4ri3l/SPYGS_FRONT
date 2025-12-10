@@ -1,5 +1,6 @@
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { useI18n } from '../context/I18nContext';
 
 export interface Product {
   id: string;
@@ -19,6 +20,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const { t } = useI18n();
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
 

@@ -1,5 +1,7 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { notificationsAPI } from '../services/api';
+import { useAuth } from './AuthContext';
 
 export interface Notification {
   id: string;
@@ -7,12 +9,16 @@ export interface Notification {
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   read: boolean;
-  timestamp: Date;
+  timestamp: Date | string;
+  discount?: number;
+  category?: string;
+  provider?: string;
 }
 
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
+  isLoading: boolean;
   addNotification: (notification: Omit<Notification, 'id' | 'read' | 'timestamp'>) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
@@ -23,32 +29,48 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      title: '¡Pedido en camino!',
-      message: 'Tu pedido de Pizzería Roma está en camino. Llegará en aproximadamente 20 minutos.',
-      type: 'success',
-      read: false,
-      timestamp: new Date(Date.now() - 5 * 60000) // 5 minutos atrás
-    },
-    {
-      id: '2',
-      title: 'Oferta especial',
-      message: '20% de descuento en todos los platos de Sushi Express. Válido hasta mañana.',
-      type: 'info',
-      read: false,
-      timestamp: new Date(Date.now() - 30 * 60000) // 30 minutos atrás
-    },
-    {
-      id: '3',
-      title: 'Pedido entregado',
-      message: 'Tu pedido #ORD-001 ha sido entregado. ¡Esperamos que lo hayas disfrutado!',
-      type: 'success',
-      read: true,
-      timestamp: new Date(Date.now() - 2 * 60 * 60000) // 2 horas atrás
-    }
-  ]);
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Cargar notificaciones personalizadas desde el backend cuando el usuario esté autenticado
+  useEffect(() => {
+    const loadNotifications = async () => {
+      if (!user) {
+        // Si no hay usuario, mantener notificaciones vacías o usar notificaciones predeterminadas
+        setNotifications([]);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const data = await notificationsAPI.getAll();
+        const formattedNotifications = (data.notifications || []).map((notif: any) => ({
+          ...notif,
+          timestamp: notif.timestamp ? new Date(notif.timestamp) : new Date(),
+          read: notif.read || false
+        }));
+        setNotifications(formattedNotifications);
+      } catch (error) {
+        console.error('Error al cargar notificaciones:', error);
+        // En caso de error, mantener notificaciones vacías
+        setNotifications([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadNotifications();
+    
+    // Recargar notificaciones cada 5 minutos si el usuario está autenticado
+    const interval = setInterval(() => {
+      if (user) {
+        loadNotifications();
+      }
+    }, 5 * 60 * 1000); // 5 minutos
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const addNotification = (notification: Omit<Notification, 'id' | 'read' | 'timestamp'>) => {
     const newNotification: Notification = {
@@ -85,6 +107,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       value={{
         notifications,
         unreadCount,
+        isLoading,
         addNotification,
         markAsRead,
         markAllAsRead,

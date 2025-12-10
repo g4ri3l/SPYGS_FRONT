@@ -3,13 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import NotificationDropdown from './NotificationDropdown';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useI18n } from '../context/I18nContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { cartCount } = useCart();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
+  const { t, language, changeLanguage, availableLanguages } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -39,20 +42,28 @@ const Navbar = () => {
               to="/home"
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              Inicio
+              {t('nav.home')}
             </Link>
             <Link
               to="/orders"
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              Mis Pedidos
+              {t('nav.orders')}
             </Link>
             <Link
               to="/favorites"
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              Favoritos
+              {t('nav.favorites')}
             </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Iconos de acción */}
@@ -74,6 +85,47 @@ const Navbar = () => {
 
             {/* Notificaciones */}
             <NotificationDropdown />
+
+            {/* Selector de Idioma */}
+            <div className="relative">
+              <button
+                onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+                className="p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Cambiar idioma"
+              >
+                <span className="text-xl">
+                  {availableLanguages.find(lang => lang.code === language)?.flag || '🌐'}
+                </span>
+              </button>
+              {isLanguageOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 z-50">
+                  <div className="py-1">
+                    {availableLanguages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          changeLanguage(lang.code);
+                          setIsLanguageOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm flex items-center space-x-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                          language === lang.code
+                            ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                            : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        <span className="text-lg">{lang.flag}</span>
+                        <span>{lang.name}</span>
+                        {language === lang.code && (
+                          <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Perfil */}
             <div className="relative">
@@ -131,6 +183,15 @@ const Navbar = () => {
                         Métodos de Pago
                       </Link>
                       <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Panel de Administración
+                        </Link>
+                      )}
                       <Link
                         to="/settings"
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400"
@@ -174,21 +235,21 @@ const Navbar = () => {
               className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
-              Inicio
+              {t('nav.home')}
             </Link>
             <Link
               to="/orders"
               className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
-              Mis Pedidos
+              {t('nav.orders')}
             </Link>
             <Link
               to="/favorites"
               className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg"
               onClick={() => setIsMenuOpen(false)}
             >
-              Favoritos
+              {t('nav.favorites')}
             </Link>
           </div>
         )}

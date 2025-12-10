@@ -1,40 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { addressesAPI } from '../services/api';
+import { useNotifications } from '../context/NotificationContext';
+import Loading from '../components/Loading';
 
 interface Address {
   id: string;
   name: string;
   street: string;
-  district: string;
+  district?: string;
   city: string;
-  postalCode: string;
-  reference: string;
+  state?: string;
+  zipCode?: string;
+  postalCode?: string;
+  country?: string;
+  reference?: string;
   isDefault: boolean;
 }
 
 const AddressesPage = () => {
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: '1',
-      name: 'Casa',
-      street: 'Av. Principal 123',
-      district: 'San Isidro',
-      city: 'Lima',
-      postalCode: '15073',
-      reference: 'Frente al parque',
-      isDefault: true
-    },
-    {
-      id: '2',
-      name: 'Oficina',
-      street: 'Jr. Los Olivos 456',
-      district: 'Miraflores',
-      city: 'Lima',
-      postalCode: '15074',
-      reference: 'Edificio 2, piso 5',
-      isDefault: false
-    }
-  ]);
-
+  const { addNotification } = useNotifications();
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Omit<Address, 'id'>>({
@@ -47,6 +34,37 @@ const AddressesPage = () => {
     isDefault: false
   });
 
+  useEffect(() => {
+    const loadAddresses = async () => {
+      setIsLoading(true);
+      try {
+        const data = await addressesAPI.getAll();
+        const formattedAddresses = (data.addresses || data || []).map((addr: any) => ({
+          id: addr.id || addr._id || '',
+          name: addr.name || 'Dirección',
+          street: addr.street || '',
+          district: addr.district || addr.state || '',
+          city: addr.city || '',
+          postalCode: addr.postalCode || addr.zipCode || '',
+          reference: addr.reference || '',
+          isDefault: addr.isDefault || false
+        }));
+        setAddresses(formattedAddresses);
+      } catch (err: any) {
+        console.error('Error al cargar direcciones:', err);
+        addNotification({
+          title: 'Error',
+          message: 'No se pudieron cargar las direcciones.',
+          type: 'error'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAddresses();
+  }, [addNotification]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -55,29 +73,82 @@ const AddressesPage = () => {
     });
   };
 
-  const handleSave = () => {
-    if (editingId) {
-      setAddresses(addresses.map(addr => 
-        addr.id === editingId ? { ...formData, id: editingId } : addr
-      ));
-      setEditingId(null);
-    } else {
-      const newAddress: Address = {
-        ...formData,
-        id: Date.now().toString()
-      };
-      setAddresses([...addresses, newAddress]);
-      setIsAdding(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      if (editingId) {
+        await addressesAPI.update(editingId, {
+          street: formData.street,
+          city: formData.city,
+          state: formData.district || '',
+          zipCode: formData.postalCode || '',
+          country: 'Perú',
+          isDefault: formData.isDefault
+        });
+        const updated = await addressesAPI.getAll();
+        const formattedAddresses = (updated.addresses || updated || []).map((addr: any) => ({
+          id: addr.id || addr._id || '',
+          name: addr.name || 'Dirección',
+          street: addr.street || '',
+          district: addr.district || addr.state || '',
+          city: addr.city || '',
+          postalCode: addr.postalCode || addr.zipCode || '',
+          reference: addr.reference || '',
+          isDefault: addr.isDefault || false
+        }));
+        setAddresses(formattedAddresses);
+        setEditingId(null);
+        addNotification({
+          title: 'Dirección actualizada',
+          message: 'La dirección se ha actualizado correctamente.',
+          type: 'success'
+        });
+      } else {
+        await addressesAPI.add(
+          formData.street,
+          formData.city,
+          formData.district || '',
+          formData.postalCode || '',
+          'Perú',
+          formData.isDefault
+        );
+        const updated = await addressesAPI.getAll();
+        const formattedAddresses = (updated.addresses || updated || []).map((addr: any) => ({
+          id: addr.id || addr._id || '',
+          name: addr.name || 'Dirección',
+          street: addr.street || '',
+          district: addr.district || addr.state || '',
+          city: addr.city || '',
+          postalCode: addr.postalCode || addr.zipCode || '',
+          reference: addr.reference || '',
+          isDefault: addr.isDefault || false
+        }));
+        setAddresses(formattedAddresses);
+        setIsAdding(false);
+        addNotification({
+          title: 'Dirección agregada',
+          message: 'La dirección se ha agregado correctamente.',
+          type: 'success'
+        });
+      }
+      setFormData({
+        name: '',
+        street: '',
+        district: '',
+        city: '',
+        postalCode: '',
+        reference: '',
+        isDefault: false
+      });
+    } catch (err: any) {
+      addNotification({
+        title: 'Error',
+        message: err.message || 'No se pudo guardar la dirección.',
+        type: 'error'
+      });
+    } finally {
+      setIsSaving(false);
     }
-    setFormData({
-      name: '',
-      street: '',
-      district: '',
-      city: '',
-      postalCode: '',
-      reference: '',
-      isDefault: false
-    });
   };
 
   const handleEdit = (address: Address) => {
@@ -94,18 +165,53 @@ const AddressesPage = () => {
     setIsAdding(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('¿Estás seguro de eliminar esta dirección?')) {
-      setAddresses(addresses.filter(addr => addr.id !== id));
+      try {
+        await addressesAPI.delete(id);
+        setAddresses(addresses.filter(addr => addr.id !== id));
+        addNotification({
+          title: 'Dirección eliminada',
+          message: 'La dirección se ha eliminado correctamente.',
+          type: 'success'
+        });
+      } catch (err: any) {
+        addNotification({
+          title: 'Error',
+          message: err.message || 'No se pudo eliminar la dirección.',
+          type: 'error'
+        });
+      }
     }
   };
 
-  const handleSetDefault = (id: string) => {
-    setAddresses(addresses.map(addr => ({
-      ...addr,
-      isDefault: addr.id === id
-    })));
+  const handleSetDefault = async (id: string) => {
+    try {
+      const address = addresses.find(addr => addr.id === id);
+      if (address) {
+        await addressesAPI.update(id, { isDefault: true });
+        setAddresses(addresses.map(addr => ({
+          ...addr,
+          isDefault: addr.id === id
+        })));
+        addNotification({
+          title: 'Dirección predeterminada',
+          message: 'La dirección se ha establecido como predeterminada.',
+          type: 'success'
+        });
+      }
+    } catch (err: any) {
+      addNotification({
+        title: 'Error',
+        message: err.message || 'No se pudo establecer la dirección predeterminada.',
+        type: 'error'
+      });
+    }
   };
+
+  if (isLoading) {
+    return <Loading fullScreen text="Cargando direcciones..." />;
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-fixed p-8">
@@ -218,9 +324,10 @@ const AddressesPage = () => {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={handleSave}
-                className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                disabled={isSaving}
+                className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Guardar
+                {isSaving ? 'Guardando...' : 'Guardar'}
               </button>
               <button
                 onClick={() => {

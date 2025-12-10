@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '../context/I18nContext';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -7,9 +8,10 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) => {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('Todos');
-  const [selectedSort, setSelectedSort] = useState('Mejor valorados');
+  const [selectedFilter, setSelectedFilter] = useState(t('products.allCategories'));
+  const [selectedSort, setSelectedSort] = useState(t('products.bestRated'));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
           <input
             type="text"
             className="w-full py-3.5 pl-12 pr-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-base transition-all duration-300 bg-gray-50 dark:bg-gray-700 dark:text-white focus:outline-none focus:border-primary-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-4 focus:ring-primary-500/10 placeholder:text-gray-400 dark:placeholder:text-gray-400"
-            placeholder="Buscar productos, servicios o negocios..."
+            placeholder={t('common.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -57,7 +59,7 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
             </svg>
           </button>
           <div className="absolute top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[140px] opacity-0 invisible -translate-y-2 transition-all duration-300 z-50 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
-            <button onClick={() => handleFilterChange('Todos')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Todos</button>
+            <button onClick={() => handleFilterChange(t('products.allCategories'))} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">{t('products.allCategories')}</button>
             <button onClick={() => handleFilterChange('Comida')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Comida</button>
           </div>
         </div>
@@ -74,10 +76,10 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
             </svg>
           </button>
           <div className="absolute top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[160px] opacity-0 invisible -translate-y-2 transition-all duration-300 z-50 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
-            <button onClick={() => handleSortChange('Mejor valorados')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Mejor valorados</button>
-            <button onClick={() => handleSortChange('Más cercanos')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Más cercanos</button>
-            <button onClick={() => handleSortChange('Menor precio')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Menor precio</button>
-            <button onClick={() => handleSortChange('Mayor precio')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Mayor precio</button>
+            <button onClick={() => handleSortChange(t('products.bestRated'))} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">{t('products.bestRated')}</button>
+            <button onClick={() => handleSortChange(t('products.closest'))} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">{t('products.closest')}</button>
+            <button onClick={() => handleSortChange(t('products.lowestPrice'))} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">{t('products.lowestPrice')}</button>
+            <button onClick={() => handleSortChange(t('products.highestPrice'))} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">{t('products.highestPrice')}</button>
           </div>
         </div>
 

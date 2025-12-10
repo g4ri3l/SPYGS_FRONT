@@ -1,14 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { profileAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
+import { useI18n } from '../context/I18nContext';
+import Loading from '../components/Loading';
 
 const ProfilePage = () => {
+  const { user } = useAuth();
+  const { t } = useI18n();
+  const { addNotification } = useNotifications();
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
-    name: 'Usuario Demo',
-    email: 'usuario@email.com',
-    phone: '+51 999 999 999',
-    birthDate: '1990-01-01',
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: '',
+    birthDate: '',
     gender: 'No especificado'
   });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      setIsLoading(true);
+      try {
+        const data = await profileAPI.get();
+        setFormData({
+          name: data.name || data.user?.name || user?.name || '',
+          email: data.email || data.user?.email || user?.email || '',
+          phone: data.phone || '',
+          birthDate: data.birthDate || '',
+          gender: data.gender || 'No especificado'
+        });
+      } catch (err: any) {
+        console.error('Error al cargar perfil:', err);
+        // Usar datos del usuario autenticado como fallback
+        if (user) {
+          setFormData({
+            name: user.name,
+            email: user.email,
+            phone: '',
+            birthDate: '',
+            gender: 'No especificado'
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -17,16 +59,35 @@ const ProfilePage = () => {
     });
   };
 
-  const handleSave = () => {
-    // Aquí iría la lógica para guardar los datos
-    setIsEditing(false);
-    // Mostrar notificación de éxito
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await profileAPI.update(formData.name, formData.email);
+      setIsEditing(false);
+      addNotification({
+        title: t('profile.profileUpdated'),
+        message: t('profile.profileUpdated'),
+        type: 'success'
+      });
+    } catch (err: any) {
+      addNotification({
+        title: t('common.error'),
+        message: err.message || t('common.error'),
+        type: 'error'
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (isLoading) {
+    return <Loading fullScreen text={t('common.loading')} />;
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-fixed p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Mi Perfil</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('profile.title')}</h1>
 
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
           {/* Avatar y Header */}
@@ -41,7 +102,7 @@ const ProfilePage = () => {
                 onClick={() => setIsEditing(!isEditing)}
                 className="mt-3 px-4 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors"
               >
-                {isEditing ? 'Cancelar' : 'Editar Perfil'}
+                {isEditing ? t('common.cancel') : t('profile.editProfile')}
               </button>
             </div>
           </div>
@@ -52,7 +113,7 @@ const ProfilePage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.name')}</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -67,7 +128,7 @@ const ProfilePage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.email')}</label>
                 {isEditing ? (
                   <input
                     type="email"
@@ -135,9 +196,10 @@ const ProfilePage = () => {
               <div className="pt-4 border-t border-gray-200">
                 <button
                   onClick={handleSave}
-                  className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                  disabled={isSaving}
+                  className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Guardar Cambios
+                  {isSaving ? t('common.loading') : t('profile.saveChanges')}
                 </button>
               </div>
             )}

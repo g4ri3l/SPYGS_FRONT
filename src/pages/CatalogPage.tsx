@@ -108,7 +108,8 @@ const mockProducts: Product[] = [
 const CatalogPage = () => {
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState(t('products.allCategories'));
+  // Código interno del filtro de categoría: 'ALL' o nombre de categoría (por ahora 'Comida')
+  const [selectedFilter, setSelectedFilter] = useState<string>('ALL');
   const [selectedSort, setSelectedSort] = useState(t('products.bestRated'));
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,7 +121,7 @@ const CatalogPage = () => {
       setIsLoading(true);
       setError('');
       try {
-        const category = selectedFilter === t('products.allCategories') ? undefined : selectedFilter;
+        const category = selectedFilter === 'ALL' ? undefined : selectedFilter;
         const data = await productsAPI.getAll(searchQuery || undefined, category, selectedSort);
         
         // Convertir los productos del backend al formato correcto
@@ -142,8 +143,22 @@ const CatalogPage = () => {
     loadProducts();
   }, [searchQuery, selectedFilter, selectedSort]);
 
-  // Usar productos del backend o mock como fallback
-  const displayedProducts = products.length > 0 ? products : mockProducts;
+  // Usar productos del backend o mock como fallback, aplicando traducciones i18n si existen
+  const baseProducts = products.length > 0 ? products : mockProducts;
+
+  const displayedProducts = baseProducts.map(product => {
+    const titleKey = `mockProducts.${product.id}.title`;
+    const descKey = `mockProducts.${product.id}.description`;
+
+    const translatedTitle = t(titleKey);
+    const translatedDescription = t(descKey);
+
+    return {
+      ...product,
+      title: translatedTitle !== titleKey ? translatedTitle : product.title,
+      description: translatedDescription !== descKey ? translatedDescription : product.description,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-orange-100 p-8 box-border">

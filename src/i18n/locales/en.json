@@ -54,11 +54,58 @@
     "rating": "Rating",
     "deliveryTime": "Delivery Time",
     "distance": "Distance",
+    "food": "Food",
     "allCategories": "All Categories",
     "bestRated": "Best rated",
     "lowestPrice": "Lowest price",
     "highestPrice": "Highest price",
     "closest": "Closest"
+  },
+  "filters": {
+    "moreFilters": "More Filters",
+    "priceRange": "Price Range",
+    "minRating": "Minimum Rating",
+    "all": "All",
+    "maxDistance": "Maximum Distance",
+    "anyDistance": "Any distance",
+    "lessThan2km": "Less than 2 km",
+    "lessThan5km": "Less than 5 km",
+    "lessThan10km": "Less than 10 km",
+    "apply": "Apply Filters"
+  },
+  "mockProducts": {
+    "1": {
+      "title": "Mixed Sushi (20 pieces)",
+      "description": "Selection of nigiri, maki and premium rolls"
+    },
+    "2": {
+      "title": "Margherita Pizza",
+      "description": "Classic pizza with tomato, mozzarella and fresh basil"
+    },
+    "3": {
+      "title": "Classic Burger",
+      "description": "100% beef patty, cheese, lettuce, tomato and our special sauce"
+    },
+    "4": {
+      "title": "Tacos al Pastor (5 pieces)",
+      "description": "Traditional tacos with marinated pork, pineapple, onion and cilantro"
+    },
+    "5": {
+      "title": "Carbonara Pasta",
+      "description": "Italian pasta with pancetta, egg, parmesan cheese and black pepper"
+    },
+    "6": {
+      "title": "Rotisserie Chicken (1/4)",
+      "description": "Marinated rotisserie chicken with fries and salad"
+    },
+    "7": {
+      "title": "Tonkotsu Ramen",
+      "description": "Japanese noodle soup with pork, egg, seaweed and scallions"
+    },
+    "8": {
+      "title": "Caesar Salad",
+      "description": "Romaine lettuce, grilled chicken, croutons, parmesan and Caesar dressing"
+    }
   },
   "cart": {
     "title": "Shopping Cart",

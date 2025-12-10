@@ -54,11 +54,58 @@
     "rating": "Calificación",
     "deliveryTime": "Tiempo de Entrega",
     "distance": "Distancia",
+    "food": "Comida",
     "allCategories": "Todas las Categorías",
     "bestRated": "Mejor valorados",
     "lowestPrice": "Menor precio",
     "highestPrice": "Mayor precio",
     "closest": "Más cercanos"
+  },
+  "filters": {
+    "moreFilters": "Más Filtros",
+    "priceRange": "Rango de Precio",
+    "minRating": "Calificación Mínima",
+    "all": "Todas",
+    "maxDistance": "Distancia Máxima",
+    "anyDistance": "Cualquier distancia",
+    "lessThan2km": "Menos de 2 km",
+    "lessThan5km": "Menos de 5 km",
+    "lessThan10km": "Menos de 10 km",
+    "apply": "Aplicar Filtros"
+  },
+  "mockProducts": {
+    "1": {
+      "title": "Sushi Variado (20 piezas)",
+      "description": "Selección de nigiri, maki y rolls premium"
+    },
+    "2": {
+      "title": "Pizza Margherita",
+      "description": "Pizza clásica con tomate, mozzarella y albahaca fresca"
+    },
+    "3": {
+      "title": "Hamburguesa Clásica",
+      "description": "Carne 100% res, queso, lechuga, tomate y nuestra salsa especial"
+    },
+    "4": {
+      "title": "Tacos al Pastor (5 unidades)",
+      "description": "Tacos tradicionales con carne al pastor, piña, cebolla y cilantro"
+    },
+    "5": {
+      "title": "Pasta Carbonara",
+      "description": "Pasta italiana con panceta, huevo, queso parmesano y pimienta negra"
+    },
+    "6": {
+      "title": "Pollo a la Brasa (1/4)",
+      "description": "Pollo marinado y asado a la brasa con papas fritas y ensalada"
+    },
+    "7": {
+      "title": "Ramen Tonkotsu",
+      "description": "Sopa de fideos japoneses con cerdo, huevo, algas y cebollín"
+    },
+    "8": {
+      "title": "Ensalada César",
+      "description": "Lechuga romana, pollo a la parrilla, crutones, parmesano y aderezo césar"
+    }
   },
   "cart": {
     "title": "Carrito de Compras",

@@ -54,11 +54,58 @@
     "rating": "Avaliação",
     "deliveryTime": "Tempo de Entrega",
     "distance": "Distância",
+    "food": "Comida",
     "allCategories": "Todas as Categorias",
     "bestRated": "Melhor avaliados",
     "lowestPrice": "Menor preço",
     "highestPrice": "Maior preço",
     "closest": "Mais próximos"
+  },
+  "filters": {
+    "moreFilters": "Mais Filtros",
+    "priceRange": "Faixa de Preço",
+    "minRating": "Avaliação Mínima",
+    "all": "Todas",
+    "maxDistance": "Distância Máxima",
+    "anyDistance": "Qualquer distância",
+    "lessThan2km": "Menos de 2 km",
+    "lessThan5km": "Menos de 5 km",
+    "lessThan10km": "Menos de 10 km",
+    "apply": "Aplicar Filtros"
+  },
+  "mockProducts": {
+    "1": {
+      "title": "Sushi Variado (20 peças)",
+      "description": "Seleção de nigiri, maki e rolls premium"
+    },
+    "2": {
+      "title": "Pizza Margherita",
+      "description": "Pizza clássica com tomate, mussarela e manjericão fresco"
+    },
+    "3": {
+      "title": "Hambúrguer Clássico",
+      "description": "Carne 100% bovina, queijo, alface, tomate e nosso molho especial"
+    },
+    "4": {
+      "title": "Tacos al Pastor (5 unidades)",
+      "description": "Tacos tradicionais com carne al pastor, abacaxi, cebola e coentro"
+    },
+    "5": {
+      "title": "Massa à Carbonara",
+      "description": "Massa italiana com pancetta, ovo, queijo parmesão e pimenta-do-reino"
+    },
+    "6": {
+      "title": "Frango Assado (1/4)",
+      "description": "Frango marinado e assado na brasa com batatas fritas e salada"
+    },
+    "7": {
+      "title": "Ramen Tonkotsu",
+      "description": "Sopa de macarrão japonesa com porco, ovo, algas e cebolinha"
+    },
+    "8": {
+      "title": "Salada Caesar",
+      "description": "Alface romana, frango grelhado, croutons, parmesão e molho caesar"
+    }
   },
   "cart": {
     "title": "Carrinho de Compras",

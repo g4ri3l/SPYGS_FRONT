@@ -57,7 +57,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
             target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop&q=80';
           }}
         />
-        <span className="absolute top-3 right-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-1.5 px-3 rounded-full text-xs font-semibold uppercase tracking-wide shadow-md">{product.category}</span>
+        <span className="absolute top-3 right-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-1.5 px-3 rounded-full text-xs font-semibold uppercase tracking-wide shadow-md">
+          {product.category === 'Comida' ? t('products.food') : product.category}
+        </span>
         <button
           onClick={handleToggleFavorite}
           className="absolute top-3 left-3 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -109,7 +111,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           onClick={handleAddToCart}
           className="mt-4 w-full py-2 bg-primary-500 text-white rounded-lg font-semibold hover:bg-primary-600 transition-colors"
         >
-          Agregar al Carrito
+          {t('products.addToCart')}
         </button>
       </div>
     </div>

@@ -1,26 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useI18n } from '../context/I18nContext';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
-  onFilterChange: (filter: string) => void;
+  onFilterChange: (filterCode: string) => void;
   onSortChange: (sort: string) => void;
 }
 
 const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState(t('products.allCategories'));
+  const [selectedFilterLabel, setSelectedFilterLabel] = useState(t('products.allCategories'));
   const [selectedSort, setSelectedSort] = useState(t('products.bestRated'));
+
+  // Cuando cambia el idioma, volver a calcular las etiquetas visibles
+  useEffect(() => {
+    setSelectedFilterLabel(t('products.allCategories'));
+    setSelectedSort(t('products.bestRated'));
+  }, [language, t]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
   };
 
-  const handleFilterChange = (filter: string) => {
-    setSelectedFilter(filter);
-    onFilterChange(filter);
+  const handleFilterChange = (filterCode: string, label: string) => {
+    setSelectedFilterLabel(label);
+    onFilterChange(filterCode);
   };
 
   const handleSortChange = (sort: string) => {
@@ -53,14 +59,24 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
             <svg className="w-3.5 h-3.5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" strokeWidth="2" />
             </svg>
-            <span>{selectedFilter}</span>
+            <span>{selectedFilterLabel}</span>
             <svg className="w-3 h-3 text-gray-600 transition-transform duration-300 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <polyline points="6 9 12 15 18 9" strokeWidth="2" />
             </svg>
           </button>
           <div className="absolute top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[140px] opacity-0 invisible -translate-y-2 transition-all duration-300 z-50 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
-            <button onClick={() => handleFilterChange(t('products.allCategories'))} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">{t('products.allCategories')}</button>
-            <button onClick={() => handleFilterChange('Comida')} className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg">Comida</button>
+            <button
+              onClick={() => handleFilterChange('ALL', t('products.allCategories'))}
+              className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg"
+            >
+              {t('products.allCategories')}
+            </button>
+            <button
+              onClick={() => handleFilterChange('Comida', t('products.food'))}
+              className="block w-full py-2 px-3 text-left text-xs text-black bg-white hover:bg-primary-50 transition-colors rounded-t-lg"
+            >
+              {t('products.food')}
+            </button>
           </div>
         </div>
 
@@ -89,7 +105,7 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
             <svg className="w-3.5 h-3.5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
-            <span>Más Filtros</span>
+            <span>{t('filters.moreFilters')}</span>
             <svg className="w-3 h-3 text-gray-600 transition-transform duration-300 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <polyline points="6 9 12 15 18 9" strokeWidth="2" />
             </svg>
@@ -97,32 +113,46 @@ const SearchBar = ({ onSearch, onFilterChange, onSortChange }: SearchBarProps) =
           <div className="absolute top-full left-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl min-w-[200px] opacity-0 invisible -translate-y-2 transition-all duration-300 z-50 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 p-3">
             <div className="space-y-2">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Rango de Precio</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  {t('filters.priceRange')}
+                </label>
                 <div className="flex gap-2">
-                  <input type="number" placeholder="Min" className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs" />
-                  <input type="number" placeholder="Max" className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs" />
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs"
+                  />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Calificación Mínima</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  {t('filters.minRating')}
+                </label>
                 <select className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs">
-                  <option>Todas</option>
+                  <option>{t('filters.all')}</option>
                   <option>4.5+</option>
                   <option>4.0+</option>
                   <option>3.5+</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Distancia Máxima</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  {t('filters.maxDistance')}
+                </label>
                 <select className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs">
-                  <option>Cualquier distancia</option>
-                  <option>Menos de 2 km</option>
-                  <option>Menos de 5 km</option>
-                  <option>Menos de 10 km</option>
+                  <option>{t('filters.anyDistance')}</option>
+                  <option>{t('filters.lessThan2km')}</option>
+                  <option>{t('filters.lessThan5km')}</option>
+                  <option>{t('filters.lessThan10km')}</option>
                 </select>
               </div>
               <button className="w-full py-1.5 bg-primary-500 text-white rounded-lg text-xs font-medium hover:bg-primary-600 transition-colors">
-                Aplicar Filtros
+                {t('filters.apply')}
               </button>
             </div>
           </div>
